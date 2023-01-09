@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 Joey Castillo
+ * Copyright (c) 2023 <#author_name#>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,23 +22,31 @@
  * SOFTWARE.
  */
 
-#ifndef MOVEMENT_CONFIG_H_
-#define MOVEMENT_CONFIG_H_
+#ifndef CHIRPY_TX_FACE_H_
+#define CHIRPY_TX_FACE_H_
 
-#include "movement_faces.h"
+#include "movement.h"
 
-const watch_face_t watch_faces[] = {
-    simple_clock_face,
-    chirpy_demo_face,
-};
+// Buzzer periods for the 16 evenly spaced symbol frequencies and the 2 sync tones
+extern const uint16_t chirpy_tone_periods[];
 
-#define MOVEMENT_NUM_FACES (sizeof(watch_faces) / sizeof(watch_face_t))
+typedef struct {
+    // Anything you need to keep track of, put it here!
+    uint8_t unused;
+} chirpy_tx_state_t;
 
-/* Determines what face to go to from the first face if you've already set 
- * a mode long press to go to the first face in preferences, and
- * excludes these faces from the normal rotation.
- * Usually it makes sense to set this to the preferences face.
- */
-#define MOVEMENT_SECONDARY_FACE_INDEX 0 // or (MOVEMENT_NUM_FACES - 2)
+void chirpy_tx_face_setup(movement_settings_t *settings, uint8_t watch_face_index, void ** context_ptr);
+void chirpy_tx_face_activate(movement_settings_t *settings, void *context);
+bool chirpy_tx_face_loop(movement_event_t event, movement_settings_t *settings, void *context);
+void chirpy_tx_face_resign(movement_settings_t *settings, void *context);
 
-#endif // MOVEMENT_CONFIG_H_
+#define chirpy_tx_face ((const watch_face_t){ \
+    chirpy_tx_face_setup, \
+    chirpy_tx_face_activate, \
+    chirpy_tx_face_loop, \
+    chirpy_tx_face_resign, \
+    NULL, \
+})
+
+#endif // CHIRPY_TX_FACE_H_
+
