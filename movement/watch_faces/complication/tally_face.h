@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 Joey Castillo
+ * Copyright (c) 2022 Andrew Mike
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,28 +22,33 @@
  * SOFTWARE.
  */
 
-#ifndef MOVEMENT_CONFIG_H_
-#define MOVEMENT_CONFIG_H_
+#ifndef TALLY_FACE_H_
+#define TALLY_FACE_H_
 
-#include "movement_faces.h"
+#include "movement.h"
 
-const watch_face_t watch_faces[] = {
-    simple_clock_face,
-    sunrise_sunset_face,
-    totp_face,
-    thermistor_readout_face,
-    voltage_face,
-    chirpy_demo_face,
-    preferences_face,    
-};
+// Tally face is designed to act as a tally counter.
+// Based on the counter_face watch face by Shogo Okamoto.
+// To advance the counter, press the Alarm button. To reset, long press the Alarm button.
 
-#define MOVEMENT_NUM_FACES (sizeof(watch_faces) / sizeof(watch_face_t))
+typedef struct {
+    uint32_t tally_idx;
+} tally_state_t;
 
-/* Determines what face to go to from the first face if you've already set 
- * a mode long press to go to the first face in preferences, and
- * excludes these faces from the normal rotation.
- * Usually it makes sense to set this to the preferences face.
- */
-#define MOVEMENT_SECONDARY_FACE_INDEX 0 // or (MOVEMENT_NUM_FACES - 2)
 
-#endif // MOVEMENT_CONFIG_H_
+void tally_face_setup(movement_settings_t *settings, uint8_t watch_face_index, void ** context_ptr);
+void tally_face_activate(movement_settings_t *settings, void *context);
+bool tally_face_loop(movement_event_t event, movement_settings_t *settings, void *context);
+void tally_face_resign(movement_settings_t *settings, void *context);
+
+void print_tally(tally_state_t *state);
+
+#define tally_face ((const watch_face_t){ \
+    tally_face_setup, \
+    tally_face_activate, \
+    tally_face_loop, \
+    tally_face_resign, \
+    NULL, \
+})
+
+#endif // TALLY_FACE_H_
