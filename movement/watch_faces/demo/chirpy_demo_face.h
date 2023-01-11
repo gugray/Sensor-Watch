@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 Joey Castillo
+ * Copyright (c) 2023 <#author_name#>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,23 +22,38 @@
  * SOFTWARE.
  */
 
-#ifndef MOVEMENT_CONFIG_H_
-#define MOVEMENT_CONFIG_H_
+#ifndef CHIRPY_DEMO_FACE_H_
+#define CHIRPY_DEMO_FACE_H_
 
-#include "movement_faces.h"
+#include "movement.h"
 
-const watch_face_t watch_faces[] = {
-    simple_clock_face,
-    chirpy_demo_face,
-};
+typedef enum {
+    CDM_INFO_4R,
+    CDM_INFO_20R,
+} chirpy_demo_mode_t;
 
-#define MOVEMENT_NUM_FACES (sizeof(watch_faces) / sizeof(watch_face_t))
+// Modes:
+// 0: Full scale at 4x rate
+// 1: Info at 4x rate
+// 2: Info at 16x rate
+// 3: Info at 32x rate
+typedef struct {
+    chirpy_demo_mode_t mode;
+} chirpy_demo_state_t;
 
-/* Determines what face to go to from the first face if you've already set 
- * a mode long press to go to the first face in preferences, and
- * excludes these faces from the normal rotation.
- * Usually it makes sense to set this to the preferences face.
- */
-#define MOVEMENT_SECONDARY_FACE_INDEX 0 // or (MOVEMENT_NUM_FACES - 2)
 
-#endif // MOVEMENT_CONFIG_H_
+void chirpy_demo_face_setup(movement_settings_t *settings, uint8_t watch_face_index, void ** context_ptr);
+void chirpy_demo_face_activate(movement_settings_t *settings, void *context);
+bool chirpy_demo_face_loop(movement_event_t event, movement_settings_t *settings, void *context);
+void chirpy_demo_face_resign(movement_settings_t *settings, void *context);
+
+#define chirpy_demo_face ((const watch_face_t){ \
+    chirpy_demo_face_setup, \
+    chirpy_demo_face_activate, \
+    chirpy_demo_face_loop, \
+    chirpy_demo_face_resign, \
+    NULL, \
+})
+
+#endif // CHIRPY_DEMO_FACE_H_
+
