@@ -30,11 +30,14 @@
 const watch_face_t watch_faces[] = {
     simple_clock_face,
     sunrise_sunset_face,
-    totp_face,
+    totp_face_lfs,
     thermistor_readout_face,
     voltage_face,
     chirpy_demo_face,
-    preferences_face,    
+    preferences_face,
+    set_time_face,
+    finetune_face,
+    nanosec_face,
 };
 
 #define MOVEMENT_NUM_FACES (sizeof(watch_faces) / sizeof(watch_face_t))
