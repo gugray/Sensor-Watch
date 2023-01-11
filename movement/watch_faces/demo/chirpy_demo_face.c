@@ -52,82 +52,155 @@ void chirpy_demo_face_activate(movement_settings_t *settings, void *context) {
     (void) settings;
     chirpy_demo_state_t *state = (chirpy_demo_state_t *)context;
 
-    state->mode = CDM_INFO_4R;
+    memset(context, 0, sizeof(chirpy_demo_state_t));
+    state->mode = CDM_SCALE;
+    movement_request_tick_frequency(64);
 }
 
 
-static void _chirpy_demo_face_update_lcd(chirpy_demo_state_t *state) {
-    // Show beep rate
-    uint8_t rate = 4;
-    if (state->mode == CDM_INFO_20R) rate = 20;
+static void _cdf_update_lcd(chirpy_demo_state_t *state) {
+
+    const char *mode_names[] = {"SC", "21"};
+    const char *mode_str = mode_names[state->mode];
+
     // Assemble & write to LCD
     char buf[11];
-    sprintf(buf, "CH%2d PLAY ", rate);
+    sprintf(buf, "CH%s PLAY ", mode_str);
     watch_display_string(buf, 0);
 }
 
-static void _chirpy_demo_face_play(chirpy_demo_state_t *state) {
-    
-    uint16_t signal_duration = state->mode == CDM_INFO_4R ? 250 : 50;
-    watch_set_indicator(WATCH_INDICATOR_BELL);
-    uint16_t i;
-
-    // Countdown
-    uint16_t buzzer_period = chirpy_tone_periods[16];
-    watch_set_buzzer_period(buzzer_period);
-    for (i = 0; i < 3; ++i) {
-        watch_set_buzzer_on();
-        delay_ms(125);
-        watch_set_buzzer_off();
-        delay_ms(875);
-    }
-
-    // Data
-    for (i = 0; i < INFO_SEQ_LEN; ++i) {
-        uint8_t sym_ix = info_seq[i];
-        buzzer_period = chirpy_tone_periods[sym_ix];
-        watch_set_buzzer_period(buzzer_period);
-        #ifdef __EMSCRIPTEN__
-        watch_set_buzzer_on();
-        #else
-        if (i == 0) watch_set_buzzer_on();
-        #endif
-        delay_ms(signal_duration);
-    }
-
+static void _cdf_clear_chirp(chirpy_demo_state_t *state) {
+    state->tick_fun = 0;
     watch_set_buzzer_off();
     watch_clear_indicator(WATCH_INDICATOR_BELL);
 }
 
+static void _cdf_scale_tick(void *context) {
 
+    chirpy_demo_state_t *state = (chirpy_demo_state_t *)context;
+
+    // Scale goes in 200Hz increments from 1000 Hz to 12 kHz -> 56 steps
+    if (state->seq_pos == 56) {
+        _cdf_clear_chirp(state);
+        return;
+    }
+    uint32_t freq = 1000 + state->seq_pos * 200;
+    uint32_t period = 1000000 / freq;
+    watch_set_buzzer_period(period);
+    #ifdef __EMSCRIPTEN__
+    watch_set_buzzer_on();
+    #else
+    if (state->seq_pos == 0) watch_set_buzzer_on();
+    #endif
+}
+
+static void _cdf_info_tick(void *context) {
+
+    chirpy_demo_state_t *state = (chirpy_demo_state_t *)context;
+
+    // Data over
+    if (state->seq_pos == INFO_SEQ_LEN) {
+        _cdf_clear_chirp(state);
+        return;
+    }
+    uint8_t tone_ix = info_seq[state->seq_pos];
+    uint16_t period = chirpy_tone_periods[tone_ix];
+    watch_set_buzzer_period(period);
+    #ifdef __EMSCRIPTEN__
+    watch_set_buzzer_on();
+    #else
+    if (state->seq_pos == 0) watch_set_buzzer_on();
+    #endif
+}
+
+static void _cdf_countdown_tick(void *context) {
+
+    chirpy_demo_state_t *state = (chirpy_demo_state_t *)context;
+
+    // Countdown over: start actual broadcast
+    if (state->seq_pos == 4 * 3) {
+        if (state->mode == CDM_SCALE) {
+            state->tick_compare = 8;
+            state->tick_count = 0;
+            state->seq_pos = 0;
+            state->tick_fun = _cdf_scale_tick;
+        }
+        else {
+            state->tick_compare = 3;
+            state->tick_count = 0;
+            state->seq_pos = 0;
+            state->tick_fun = _cdf_info_tick;
+        }
+        return;
+    }
+    // Sound or turn off buzzer
+    if ((state->seq_pos % 4) == 0) {
+        watch_set_buzzer_period(NotePeriods[BUZZER_NOTE_A5]);
+        watch_set_buzzer_on();
+    }
+    else if ((state->seq_pos % 4) == 1) {
+        watch_set_buzzer_off();
+    }
+}
 bool chirpy_demo_face_loop(movement_event_t event, movement_settings_t *settings, void *context) {
     (void) settings;
     chirpy_demo_state_t *state = (chirpy_demo_state_t *)context;
 
+    bool can_enter_standy = true;
+
     switch (event.event_type) {
         case EVENT_ACTIVATE:
-            _chirpy_demo_face_update_lcd(state);
-            movement_request_tick_frequency(32);
+            _cdf_update_lcd(state);
+            movement_request_tick_frequency(64);
             break;
         case EVENT_MODE_BUTTON_UP:
-            movement_move_to_next_face();
+            // Do not exit face while we're chirping
+            if (state->tick_fun != 0) {
+                movement_move_to_next_face();
+            }
             break;
         case EVENT_LIGHT_BUTTON_UP:
-            state->mode = (state->mode + 1) % 2;
-            _chirpy_demo_face_update_lcd(state);
+            // Cycle through modes, unless we're currently chirping
+            if (state->tick_fun != 0) {
+                state->mode = (state->mode + 1) % CDM_COUNT;
+                _cdf_update_lcd(state);
+            }
             break;
         case EVENT_ALARM_BUTTON_UP:
-            _chirpy_demo_face_play(state);
+            // If currently chirping: stop
+            if (state->tick_fun != 0) {
+                _cdf_clear_chirp(state);
+            }
+            // Start chirping countdown
+            else {
+                state->tick_count = 0;
+                state->tick_compare = 16;
+                state->seq_pos = 0;
+                state->tick_fun = _cdf_countdown_tick;
+                watch_set_indicator(WATCH_INDICATOR_BELL);
+            }
+            break;
+        case EVENT_TICK:
+            if (state->tick_fun != 0) {
+                ++state->tick_count;
+                if (state->tick_count == state->tick_compare) {
+                    state->tick_count = 0;
+                    state->tick_fun(context);
+                    ++state->seq_pos;
+                    can_enter_standy = 0;
+                }
+            }
             break;
         case EVENT_TIMEOUT:
-            movement_move_to_face(0);
+            // Do not time out while we're chirping
+            if (state->tick_fun != 0) {
+                movement_move_to_face(0);
+            }
         default:
             break;
     }
 
-    // return true if the watch can enter standby mode. If you are PWM'ing an LED or buzzing the buzzer here,
-    // you should return false since the PWM driver does not operate in standby mode.
-    return true;
+    return can_enter_standy;
 }
 
 void chirpy_demo_face_resign(movement_settings_t *settings, void *context) {
