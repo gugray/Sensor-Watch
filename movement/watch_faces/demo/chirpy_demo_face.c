@@ -155,13 +155,13 @@ bool chirpy_demo_face_loop(movement_event_t event, movement_settings_t *settings
             break;
         case EVENT_MODE_BUTTON_UP:
             // Do not exit face while we're chirping
-            if (state->tick_fun != 0) {
+            if (state->tick_fun == 0) {
                 movement_move_to_next_face();
             }
             break;
         case EVENT_LIGHT_BUTTON_UP:
             // Cycle through modes, unless we're currently chirping
-            if (state->tick_fun != 0) {
+            if (state->tick_fun == 0) {
                 state->mode = (state->mode + 1) % CDM_COUNT;
                 _cdf_update_lcd(state);
             }
@@ -193,7 +193,7 @@ bool chirpy_demo_face_loop(movement_event_t event, movement_settings_t *settings
             break;
         case EVENT_TIMEOUT:
             // Do not time out while we're chirping
-            if (state->tick_fun != 0) {
+            if (state->tick_fun == 0) {
                 movement_move_to_face(0);
             }
         default:
