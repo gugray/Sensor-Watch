@@ -1,3 +1,6 @@
+totp_face_lfs_secrets.h
+totp_face_secrets.h
+
 **/build/
 **/build-sim/
 *.b#*
