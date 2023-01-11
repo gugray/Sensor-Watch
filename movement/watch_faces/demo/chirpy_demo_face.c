@@ -87,11 +87,7 @@ static void _cdf_scale_tick(void *context) {
     uint32_t freq = 1000 + state->seq_pos * 200;
     uint32_t period = 1000000 / freq;
     watch_set_buzzer_period(period);
-    #ifdef __EMSCRIPTEN__
     watch_set_buzzer_on();
-    #else
-    if (state->seq_pos == 0) watch_set_buzzer_on();
-    #endif
 }
 
 static void _cdf_info_tick(void *context) {
@@ -106,11 +102,7 @@ static void _cdf_info_tick(void *context) {
     uint8_t tone_ix = info_seq[state->seq_pos];
     uint16_t period = chirpy_tone_periods[tone_ix];
     watch_set_buzzer_period(period);
-    #ifdef __EMSCRIPTEN__
     watch_set_buzzer_on();
-    #else
-    if (state->seq_pos == 0) watch_set_buzzer_on();
-    #endif
 }
 
 static void _cdf_countdown_tick(void *context) {
@@ -146,7 +138,7 @@ bool chirpy_demo_face_loop(movement_event_t event, movement_settings_t *settings
     (void) settings;
     chirpy_demo_state_t *state = (chirpy_demo_state_t *)context;
 
-    bool can_enter_standy = true;
+    bool can_enter_standby = true;
 
     switch (event.event_type) {
         case EVENT_ACTIVATE:
@@ -178,16 +170,17 @@ bool chirpy_demo_face_loop(movement_event_t event, movement_settings_t *settings
                 state->seq_pos = 0;
                 state->tick_fun = _cdf_countdown_tick;
                 watch_set_indicator(WATCH_INDICATOR_BELL);
+                can_enter_standby = false;
             }
             break;
         case EVENT_TICK:
             if (state->tick_fun != 0) {
+                can_enter_standby = false;
                 ++state->tick_count;
                 if (state->tick_count == state->tick_compare) {
                     state->tick_count = 0;
                     state->tick_fun(context);
                     ++state->seq_pos;
-                    can_enter_standy = 0;
                 }
             }
             break;
@@ -200,7 +193,7 @@ bool chirpy_demo_face_loop(movement_event_t event, movement_settings_t *settings
             break;
     }
 
-    return can_enter_standy;
+    return can_enter_standby;
 }
 
 void chirpy_demo_face_resign(movement_settings_t *settings, void *context) {
