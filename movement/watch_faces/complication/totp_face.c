@@ -5,6 +5,8 @@
 #include "watch_utility.h"
 #include "TOTP.h"
 
+#include "totp_face_secrets.h"
+
 // Use https://cryptii.com/pipes/base32-to-hex to convert base32 to hex
 // Use https://github.com/susam/mintotp to generate test codes for verification
 // Available algorothms:
@@ -13,6 +15,8 @@
 // SHA256
 // SHA384
 // SHA512
+
+/*
 
 ////////////////////////////////////////////////////////////////////////////////
 // Enter your TOTP key data below
@@ -39,6 +43,8 @@ static const hmac_alg algorithms[] = {
 };
 // END OF KEY DATA.
 ////////////////////////////////////////////////////////////////////////////////
+
+*/
 
 void totp_face_setup(movement_settings_t *settings, uint8_t watch_face_index, void ** context_ptr) {
     (void) settings;
