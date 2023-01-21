@@ -33,7 +33,6 @@ const watch_face_t watch_faces[] = {
     totp_face,
     thermistor_readout_face,
     voltage_face,
-    chirpy_demo_face,
     preferences_face,
     set_time_face,
     finetune_face,
