@@ -17,6 +17,7 @@ INCLUDES += \
   -I../watch_faces/sensor/ \
   -I../watch_faces/demo/ \
   -I../../littlefs/ \
+  -I../lib/chirpy_tx/ \
   -I../lib/TOTP/ \
   -I../lib/base32/ \
   -I../lib/sunriset/ \
@@ -30,6 +31,7 @@ INCLUDES += \
 #   ../drivers/lis2dh.c \
 #   ../watch_faces/fitness/step_count_face.c
 SRCS += \
+  ../lib/chirpy_tx/chirpy_tx.c \
   ../lib/TOTP/sha1.c \
   ../lib/TOTP/sha256.c \
   ../lib/TOTP/sha512.c \
@@ -89,6 +91,8 @@ SRCS += \
   ../watch_faces/complication/tally_face.c \
   ../watch_faces/complication/tarot_face.c \
   ../watch_faces/complication/rpn_calculator_face.c \
+  ../watch_faces/complication/activity_face.c \
+  ../watch_faces/demo/chirpy_demo_face.c \
 # New watch faces go above this line.
 
 # Leave this line at the bottom of the file; it has all the targets for making your project.

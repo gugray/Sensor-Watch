@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 <#author_name#>
+ * Copyright (c) 2023 Gabor L Ugray
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,23 +22,30 @@
  * SOFTWARE.
  */
 
-#ifndef CHIRPY_DEMO_FACE_H_
-#define CHIRPY_DEMO_FACE_H_
+#ifndef ACTIVITY_FACE_H_
+#define ACTIVITY_FACE_H_
 
 #include "movement.h"
 
-void chirpy_demo_face_setup(movement_settings_t *settings, uint8_t watch_face_index, void ** context_ptr);
-void chirpy_demo_face_activate(movement_settings_t *settings, void *context);
-bool chirpy_demo_face_loop(movement_event_t event, movement_settings_t *settings, void *context);
-void chirpy_demo_face_resign(movement_settings_t *settings, void *context);
+/*
+ * A DESCRIPTION OF YOUR WATCH FACE
+ *
+ * and a description of how use it
+ *
+ */
 
-#define chirpy_demo_face ((const watch_face_t){ \
-    chirpy_demo_face_setup, \
-    chirpy_demo_face_activate, \
-    chirpy_demo_face_loop, \
-    chirpy_demo_face_resign, \
+void activity_face_setup(movement_settings_t *settings, uint8_t watch_face_index, void ** context_ptr);
+void activity_face_activate(movement_settings_t *settings, void *context);
+bool activity_face_loop(movement_event_t event, movement_settings_t *settings, void *context);
+void activity_face_resign(movement_settings_t *settings, void *context);
+
+#define activity_face ((const watch_face_t){ \
+    activity_face_setup, \
+    activity_face_activate, \
+    activity_face_loop, \
+    activity_face_resign, \
     NULL, \
 })
 
-#endif // CHIRPY_DEMO_FACE_H_
+#endif // ACTIVITY_FACE_H_
 
