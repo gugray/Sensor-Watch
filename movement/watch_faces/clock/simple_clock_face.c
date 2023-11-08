@@ -128,12 +128,6 @@ bool simple_clock_face_loop(movement_event_t event, movement_settings_t *setting
             // handle alarm indicator
             if (state->alarm_enabled != settings->bit.alarm_enabled) _update_alarm_indicator(settings->bit.alarm_enabled, state);
             break;
-        case EVENT_MODE_BUTTON_UP:
-            movement_move_to_next_face();
-            return false;
-        case EVENT_LIGHT_BUTTON_DOWN:
-            movement_illuminate_led();
-            break;
         case EVENT_ALARM_LONG_PRESS:
             state->signal_enabled = !state->signal_enabled;
             if (state->signal_enabled) watch_set_indicator(WATCH_INDICATOR_BELL);
@@ -142,20 +136,14 @@ bool simple_clock_face_loop(movement_event_t event, movement_settings_t *setting
         case EVENT_BACKGROUND_TASK:
             // uncomment this line to snap back to the clock face when the hour signal sounds:
             // movement_move_to_face(state->watch_face_index);
-            if (watch_is_buzzer_or_led_enabled()) {
-                // if we are in the foreground, we can just beep.
-                movement_play_signal();
-            } else {
-                // if we were in the background, we need to enable the buzzer peripheral first,
-                watch_enable_buzzer();
-                // beep quickly (this call blocks for 275 ms),
-                movement_play_signal();
-                // and then turn the buzzer peripheral off again.
-                watch_disable_buzzer();
-            }
+            #ifdef SIGNAL_TUNE_DEFAULT
+            movement_play_signal();
+            #else
+            movement_play_tune();
+            #endif
             break;
         default:
-            break;
+            return movement_default_loop_handler(event, settings);
     }
 
     return true;

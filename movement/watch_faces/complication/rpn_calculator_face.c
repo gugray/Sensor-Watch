@@ -280,7 +280,7 @@ bool rpn_calculator_face_loop(movement_event_t event, movement_settings_t *setti
                 break;
             }
             break;
-        case EVENT_LIGHT_BUTTON_UP:
+        case EVENT_LIGHT_BUTTON_DOWN:
             switch (state->mode) {
                 case rpn_calculator_waiting:
                     state->mode = rpn_calculator_op;
@@ -333,6 +333,7 @@ bool rpn_calculator_face_loop(movement_event_t event, movement_settings_t *setti
         case EVENT_LOW_ENERGY_UPDATE:
             break;
         default:
+            movement_default_loop_handler(event, settings);
             break;
     }
 

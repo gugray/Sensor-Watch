@@ -138,9 +138,6 @@ bool tachymeter_face_loop(movement_event_t event, movement_settings_t *settings,
                 state->animation_state = (state->animation_state + 1) % 6;
             }
             break;
-        case EVENT_MODE_BUTTON_UP:
-            movement_move_to_next_face();
-            break;
         case EVENT_LIGHT_BUTTON_UP:
             if (state->editing){
                 // Go to next digit
@@ -253,7 +250,11 @@ bool tachymeter_face_loop(movement_event_t event, movement_settings_t *settings,
             // You should also consider starting the tick animation, to show the wearer that this is sleep mode:
             // watch_start_tick_animation(500);
             break;
+        case EVENT_LIGHT_BUTTON_DOWN:
+            // don't light up every time light is hit
+            break;
         default:
+            movement_default_loop_handler(event, settings);
             break;
     }
     // return true if the watch can enter standby mode. If you are PWM'ing an LED or buzzing the buzzer here,

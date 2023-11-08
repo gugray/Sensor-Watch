@@ -46,8 +46,7 @@ static void _handle_alarm_button(movement_settings_t *settings, watch_date_time 
             date_time.unit.second = 0;
             break;
         case 3: // year
-            // only allow 2021-2030. fix this sometime next decade
-            date_time.unit.year = ((date_time.unit.year % 10) + 1);
+            date_time.unit.year = ((date_time.unit.year % 60) + 1);
             break;
         case 4: // month
             date_time.unit.month = (date_time.unit.month % 12) + 1;
@@ -115,7 +114,7 @@ bool set_time_face_loop(movement_event_t event, movement_settings_t *settings, v
             _abort_quick_ticks();
             movement_move_to_next_face();
             return false;
-        case EVENT_LIGHT_BUTTON_UP:
+        case EVENT_LIGHT_BUTTON_DOWN:
             current_page = (current_page + 1) % SET_TIME_FACE_NUM_SETTINGS;
             *((uint8_t *)context) = current_page;
             break;
@@ -128,7 +127,7 @@ bool set_time_face_loop(movement_event_t event, movement_settings_t *settings, v
             movement_move_to_face(0);
             break;
         default:
-            break;
+            return movement_default_loop_handler(event, settings);
     }
 
     char buf[11];

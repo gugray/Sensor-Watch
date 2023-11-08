@@ -285,6 +285,9 @@ typedef struct {
 
 void movement_move_to_face(uint8_t watch_face_index);
 void movement_move_to_next_face(void);
+
+bool movement_default_loop_handler(movement_event_t event, movement_settings_t *settings);
+
 void movement_illuminate_led(void);
 
 void movement_request_tick_frequency(uint8_t freq);
@@ -304,6 +307,7 @@ void movement_cancel_background_task_for_face(uint8_t watch_face_index);
 void movement_request_wake(void);
 
 void movement_play_signal(void);
+void movement_play_tune(void);
 void movement_play_alarm(void);
 void movement_play_alarm_beeps(uint8_t rounds, BuzzerNote alarm_note);
 

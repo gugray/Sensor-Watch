@@ -55,12 +55,6 @@ bool voltage_face_loop(movement_event_t event, movement_settings_t *settings, vo
     (void) context;
     watch_date_time date_time;
     switch (event.event_type) {
-        case EVENT_MODE_BUTTON_UP:
-            movement_move_to_next_face();
-            break;
-        case EVENT_LIGHT_BUTTON_DOWN:
-            movement_illuminate_led();
-            break;
         case EVENT_ACTIVATE:
             _voltage_face_update_display();
             break;
@@ -74,10 +68,20 @@ bool voltage_face_loop(movement_event_t event, movement_settings_t *settings, vo
             }
             break;
         case EVENT_LOW_ENERGY_UPDATE:
-            watch_clear_indicator(WATCH_INDICATOR_SIGNAL);
-            watch_display_string("BA  SLEEP ", 0);
+            // clear seconds area and start tick animation if necessary
+            if (!watch_tick_animation_is_running()) {
+                watch_display_string("  ", 8);
+                watch_start_tick_animation(1000);
+            }
+            // update once an hour
+            if (date_time.unit.minute == 0) {
+                watch_clear_indicator(WATCH_INDICATOR_SIGNAL);
+                _voltage_face_update_display();
+                watch_display_string("  ", 8);
+            }
             break;
         default:
+            movement_default_loop_handler(event, settings);
             break;
     }
 
